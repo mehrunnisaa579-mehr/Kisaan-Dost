@@ -5,9 +5,25 @@
 // or use an ngrok URL.
 // Example: const BASE_URL = 'http://192.168.1.100:8000';
 
-const BASE_URL = 'http://192.168.1.21:8000';
+const BASE_URL = 'https://kisaan-dost.onrender.com';
 const API_URL = `${BASE_URL}/analyze`;
 const TIMEOUT_MS = 90000; // 90 seconds
+
+export async function pingBackend() {
+  const url = `${BASE_URL}/health`;
+  console.log("Pinging backend to wake from cold start:", url);
+  try {
+    const response = await fetch(url, { method: 'GET' });
+    if (response.ok) {
+      const data = await response.json();
+      console.log("Backend awake response:", data);
+      return true;
+    }
+  } catch (error) {
+    console.log("Backend ping error:", error);
+  }
+  return false;
+}
 
 export async function analyzeCrop({ text, crop, latitude, longitude, image }) {
   console.log("Sending request to backend...", API_URL);

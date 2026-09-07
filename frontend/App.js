@@ -19,7 +19,7 @@ import { Audio } from 'expo-av';
 import MultimodalInput from './components/MultimodalInput';
 import WeatherCard from './components/WeatherCard';
 import LoadingSpinner from './components/LoadingSpinner';
-import { analyzeCrop, fetchLiveWeather, generateTTS, voiceAnalyze } from './services/api';
+import { analyzeCrop, fetchLiveWeather, generateTTS, voiceAnalyze, pingBackend } from './services/api';
 
 const CHAT_STORAGE_KEY = 'farmai_chat_messages';
 
@@ -359,6 +359,20 @@ export default function App() {
   const [loadingMessage, setLoadingMessage] = useState(null);
   const [lastQueryText, setLastQueryText] = useState('');
   const [isVoiceLoading, setIsVoiceLoading] = useState(false);
+  const [isWakingBackend, setIsWakingBackend] = useState(false);
+
+  // ── Wake backend immediately on app load (Render cold-start mitigation) ──
+  useEffect(() => {
+    console.log("App mounted: Triggering lightweight backend wake-up ping...");
+    let timer = setTimeout(() => {
+      setIsWakingBackend(true);
+    }, 2500);
+
+    pingBackend().finally(() => {
+      clearTimeout(timer);
+      setIsWakingBackend(false);
+    });
+  }, []);
 
   // Unmount cleanup for audio
   useEffect(() => {
@@ -718,6 +732,11 @@ export default function App() {
           <View style={styles.homeHeader}>
             <Text style={styles.homeTitle}>🌾 کسان دوست</Text>
             <Text style={styles.homeSubtitle}>آپ کا زرعی مددگار</Text>
+            {isWakingBackend && (
+              <Text style={{ fontSize: 12, color: '#d97706', marginTop: 4 }}>
+                ⚡ سرور بیدار ہو رہا ہے...
+              </Text>
+            )}
           </View>
 
           <View style={styles.cardsContainer}>
@@ -819,7 +838,9 @@ export default function App() {
         </TouchableOpacity>
         <View style={styles.chatHeaderCenter}>
           <Text style={styles.chatHeaderTitle}>💬 گفتگو</Text>
-          <Text style={styles.chatHeaderSub}>کسان دوست سے مدد لیں</Text>
+          <Text style={styles.chatHeaderSub}>
+            {isWakingBackend ? '⚡ سرور بیدار ہو رہا ہے...' : 'کسان دوست سے مدد لیں'}
+          </Text>
         </View>
         {/* Clear Chat */}
         <TouchableOpacity
