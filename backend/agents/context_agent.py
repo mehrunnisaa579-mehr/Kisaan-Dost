@@ -60,13 +60,17 @@ def get_context(parsed_input: dict, diagnosis: dict) -> dict:
     if weather["rain_expected"]:
         context_notes.append("بارش متوقع ہے۔")
 
+    # --- IoT Soil Sensor Data ---
+    from services.iot_service import get_latest_reading
+    soil_data = get_latest_reading()
+
     latency = measure_latency_ms(t0)
 
     log = create_log(
         agent_name="ContextAgent",
         input_summary=f"weather_source={weather['source']}, "
                       f"contradictions={len(contradictions)}",
-        decision="Context enriched with weather and contradiction check",
+        decision="Context enriched with weather, soil sensor data, and contradiction check",
         status="success",
         latency_ms=latency,
     )
@@ -75,5 +79,6 @@ def get_context(parsed_input: dict, diagnosis: dict) -> dict:
         "weather": weather,
         "contradictions": contradictions,
         "context_notes": context_notes,
+        "soil_data": soil_data,
         "log": log,
     }

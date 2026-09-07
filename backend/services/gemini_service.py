@@ -546,6 +546,21 @@ def generate_gemini_farmer_response(
         weather_instruction = get_weather_instruction(weather)
         context_lines.append(f"موسم کی صورتحال کے لیے ہدایت: {weather_instruction}")
 
+        # ── IoT Soil Sensor Data Integration ──
+        from services.iot_service import get_latest_reading
+        soil_data = get_latest_reading()
+        if soil_data is not None:
+            sm = soil_data.get("soil_moisture")
+            temp = soil_data.get("temperature")
+            hum = soil_data.get("humidity")
+            context_lines.append(
+                f"فیلڈ سینسر کی لائیو معلومات (Live Field Sensor Telemetry):\n"
+                f"- زمین کی نمی (Soil Moisture): {sm}%\n"
+                f"- درجہ حرارت (Temperature): {temp}°C\n"
+                f"- ہوائی نمی (Humidity): {hum}%\n"
+                f"Agar yeh maloomat kisan ke sawal se relevant ho (jaise pani dene ka faisla, ya bimari ka khatra jo nami se juda ho), to apne jawab mein is field data ko dhyan mein rakh kar advice do — warna is data ka zikar mat karo."
+            )
+
         context_block = "\n".join(context_lines) if context_lines else user_text
 
         # ── Inject RAG context if available ──────────────────────────────────
