@@ -2,6 +2,7 @@ from fastapi import APIRouter, Request
 from pydantic import BaseModel
 from typing import Optional
 import logging
+import time
 
 from services.tts_service import generate_tts_audio
 
@@ -33,11 +34,19 @@ async def text_to_speech(payload: TTSRequest, request: Request):
     text = payload.text
     lang_hint = payload.language_hint
     
-    logger.info("Handling /tts request: text_len=%d, lang_hint=%s", len(text) if text else 0, lang_hint)
+    t_tts_req_start = time.perf_counter()
+    logger.info("[TIMING] Standalone /tts request received: text_len=%d, lang_hint=%s", len(text) if text else 0, lang_hint)
     
     # Generate audio using TTS service
     result = generate_tts_audio(text, lang_hint)
     
+    t_tts_req_end = time.perf_counter()
+    logger.info("[TIMING] Standalone /tts completed in %.2f s | success=%s | model_used=%s | error_type=%s", 
+                t_tts_req_end - t_tts_req_start, 
+                result.get("success"), 
+                result.get("tts_status", {}).get("model_used"), 
+                result.get("error_type"))
+
     if not result.get("success"):
         return {
             "status": "error",

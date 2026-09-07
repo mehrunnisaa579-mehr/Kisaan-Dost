@@ -7,7 +7,7 @@
 
 const BASE_URL = 'http://192.168.1.21:8000';
 const API_URL = `${BASE_URL}/analyze`;
-const TIMEOUT_MS = 60000; // 60 seconds
+const TIMEOUT_MS = 90000; // 90 seconds
 
 export async function analyzeCrop({ text, crop, latitude, longitude, image }) {
   console.log("Sending request to backend...", API_URL);

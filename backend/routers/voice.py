@@ -40,6 +40,9 @@ async def voice_analyze(
     Transcribes audio to text, runs it through the existing 7-agent analysis flow,
     generates TTS audio from the tts_summary, and returns the response.
     """
+    t_req_start = time.perf_counter()
+    logger.info("[TIMING] /voice-analyze request received")
+
     try:
         # 1. Audio Validation
         if not audio or getattr(audio, "filename", "") == "":
@@ -122,8 +125,13 @@ async def voice_analyze(
             }
 
         # 2. Transcribe Audio
+        t_stt_start = time.perf_counter()
+        logger.info("[TIMING] STT stage started")
         mime_type = audio.content_type or "audio/m4a"
         trans_res = transcribe_audio(audio_bytes, mime_type, language_hint)
+        t_stt_done = time.perf_counter()
+        logger.info("[TIMING] STT stage completed in %.2f s | model_used=%s | success=%s", 
+                    t_stt_done - t_stt_start, trans_res.get("model_used"), trans_res.get("success"))
         
         if not trans_res.get("success"):
             error_type = trans_res.get("error_type", "transcription_failed")
@@ -163,6 +171,7 @@ async def voice_analyze(
             mandi_tts_summary = mandi_result["tts_summary"]
 
             # Generate TTS audio for mandi response
+            t_mandi_tts_start = time.perf_counter()
             mandi_lang_hint = detected_lang if detected_lang not in (None, "unknown") else "ur"
             tts_res = generate_tts_audio(mandi_tts_summary, mandi_lang_hint)
             audio_url = None
@@ -181,6 +190,9 @@ async def voice_analyze(
                     base_url = str(request.base_url).rstrip('/')
                     audio_url = f"{base_url}/static/audio/{filename}"
                     tts_success = True
+
+            t_mandi_tts_done = time.perf_counter()
+            logger.info("[TIMING] Mandi TTS stage completed in %.2f s", t_mandi_tts_done - t_mandi_tts_start)
 
             return {
                 "status": "success",
@@ -218,6 +230,8 @@ async def voice_analyze(
         # ── End Mandi Rate Intercept ─────────────────────────────────────────────────
 
         # 3. Use Existing Analysis Logic (Pipeline)
+        t_llm_start = time.perf_counter()
+        logger.info("[TIMING] LLM/analyze stage started")
         try:
             # 1. InputParser
             parsed = parse_input(
@@ -266,6 +280,10 @@ async def voice_analyze(
             pipeline_error = "analysis_failed"
             outcome = {}
 
+        t_llm_done = time.perf_counter()
+        logger.info("[TIMING] LLM/analyze stage completed in %.2f s | model_used=%s", 
+                    t_llm_done - t_llm_start, outcome.get("gemini_status", {}).get("model_used"))
+
         if not analysis_success:
             return {
                 "status": "success",
@@ -292,6 +310,8 @@ async def voice_analyze(
             }
 
         # 4. Generate TTS Audio for voice response
+        t_tts_start = time.perf_counter()
+        logger.info("[TIMING] TTS stage started")
         lang_hint = parsed.get("language_hint")
         if lang_hint in ("punjabi", "siraiki"):
             logger.info("[TTS_FLOW] regional_lang=%s", lang_hint)
@@ -327,6 +347,13 @@ async def voice_analyze(
                     logger.info("[TTS_FLOW] audio_created=false")
             else:
                 tts_error_type = tts_res.get("error_type", "tts_failed")
+
+        t_tts_done = time.perf_counter()
+        logger.info("[TIMING] TTS stage completed in %.2f s | model_used=%s | tts_success=%s", 
+                    t_tts_done - t_tts_start, tts_res.get("tts_status", {}).get("model_used"), tts_success)
+
+        t_req_end = time.perf_counter()
+        logger.info("[TIMING] Total /voice-analyze request completed in %.2f s", t_req_end - t_req_start)
 
         return {
             "status": "success",
