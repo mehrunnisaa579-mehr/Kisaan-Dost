@@ -57,59 +57,31 @@
 ### 1. Backend Setup
 
 1. **Navigate to the backend directory:**
-   ```bash
+```bash
    cd backend
-   ```
+```
 
 2. **Install Python dependencies:**
-   ```bash
+```bash
    pip install -r requirements.txt
-   ```
+```
 
 3. **Configure Environment Variables:**
    Copy `.env.example` to `.env` and add your Google Gemini API Key:
-   ```bash
+```bash
    cp .env.example .env
-   ```
+```
    *Required variables in `.env`:*
-   ```env
+```env
    GEMINI_API_KEY=your_gemini_api_key_here
-   ```
+```
 
 4. **Start the Backend Server:**
-   ```bash
+```bash
    uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-   ```
+```
    The backend will be running at `http://localhost:8000`.
 
 ---
 
-### 2. Frontend Setup
-
-1. **Navigate to the frontend directory:**
-   ```bash
-   cd frontend
-   ```
-
-2. **Install Node dependencies:**
-   ```bash
-   npm install
-   ```
-
-3. **Update API Endpoint URL:**
-   In `frontend/services/api.js`, update `BASE_URL` with your local machine's IP address (for physical device / Expo Go testing) or keep local host for emulator testing:
-   ```javascript
-   const BASE_URL = 'http://<YOUR_LOCAL_IP>:8000';
-   ```
-
-4. **Start the Expo Development Server:**
-   ```bash
-   npx expo start
-   ```
-   Scan the QR code using Expo Go on your mobile device or press `a` for Android Emulator / `i` for iOS Simulator.
-
----
-
-## 📜 License
-
-This project is licensed under the MIT License.
+### 2.
