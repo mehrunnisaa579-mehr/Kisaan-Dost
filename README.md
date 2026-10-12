@@ -1,6 +1,12 @@
 # KisaanDost 🌾
 > An AI farming assistant for Pakistani farmers — voice-first, multilingual (Urdu, Roman Urdu, English, Punjabi, Siraiki).
 
+## 👥 Team
+
+- [Muhammad Isa](https://github.com/m250526-del): AI Architect, RAG & AI Pipeline
+- [Ali Zafar](https://github.com/Slayer-10): Frontend Developer, AI
+- [Mehrunnisa Shabbir](https://github.com/mehrunnisaa579-mehr): Backend Developer, Frontend
+
 ---
 
 ## 🚀 What It Does
@@ -84,4 +90,32 @@
 
 ---
 
-### 2.
+### 2. Frontend Setup
+
+1. **Navigate to the frontend directory:**
+```bash
+   cd frontend
+```
+
+2. **Install Node dependencies:**
+```bash
+   npm install
+```
+
+3. **Update API Endpoint URL:**
+   In `frontend/services/api.js`, update `BASE_URL` with your local machine's IP address (for physical device / Expo Go testing) or keep local host for emulator testing:
+```javascript
+   const BASE_URL = 'http://<YOUR_LOCAL_IP>:8000';
+```
+
+4. **Start the Expo Development Server:**
+```bash
+   npx expo start
+```
+   Scan the QR code using Expo Go on your mobile device or press `a` for Android Emulator / `i` for iOS Simulator.
+
+---
+
+## 📜 License
+
+This project is licensed under the MIT License.
